@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D9 Harlem Votes™ — Voter Engagement Tracker</title>
+<style>
+  :root {
+    --red: #CB0606;
+    --red-deep: #9B0303;
+    --green: #2F5F48;
+    --green-deep: #1F4030;
+    --black: #1A1A1A;
+    --ink: #2E2E2E;
+    --muted: #6B6B6B;
+    --rule: #DDDDDD;
+    --grey-bg: #F4F4F4;
+    --paper: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .stripe { display: flex; height: 5px; }
+  .stripe .s-red   { flex: 1; background: var(--red); }
+  .stripe .s-black { flex: 1; background: var(--black); }
+  .stripe .s-green { flex: 1; background: var(--green); }
+  .stripe.thin { height: 3px; }
+
+  header {
+    background: var(--paper);
+    padding: 32px 20px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+  header img.logo {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 18px;
+  }
+  header .wordmark {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+  header .wm-d9     { color: var(--black); }
+  header .wm-harlem { color: var(--black); }
+  header .wm-votes  { color: var(--black); position: relative; }
+  header .wm-votes sup {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--black);
+    vertical-align: super;
+    margin-left: 2px;
+  }
+  header .sub {
+    font-size: 17px;
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .wrap {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+  }
+  label {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 22px 0 8px;
+  }
+  label:first-of-type { margin-top: 0; }
+  .req { color: var(--red); margin-left: 2px; }
+  .optional { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 4px; }
+
+  select, input[type="text"], textarea {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-family: inherit;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+  }
+  select:focus, input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(47,95,72,0.15);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .radios { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .path-group {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    margin: 10px 0 0;
+  }
+  .path-group:first-child { margin-top: 0; }
+
+  .shift-banner {
+    padding: 14px 16px;
+    background: var(--grey-bg);
+    border-radius: 8px;
+    border-left: 4px solid var(--green);
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .shift-banner .who { font-weight: 800; color: var(--black); font-size: 15px; }
+  .shift-banner .meta { color: var(--muted); margin-top: 2px; }
+  .shift-banner .edit {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .radio {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+  }
+  .radio:has(input:checked) { border-color: var(--green); background: #F5F9F6; }
+  .radio input { margin-top: 4px; flex-shrink: 0; accent-color: var(--green); width: 18px; height: 18px; }
+  .radio-label { font-size: 16px; line-height: 1.4; }
+  .radio-label strong { display: block; font-weight: 700; color: var(--ink); }
+  .radio-label .desc { color: var(--muted); font-size: 14px; margin-top: 3px; }
+
+  .tally-hint { font-size: 14px; color: var(--muted); margin: 6px 0 14px; }
+  .tally { display: flex; flex-direction: column; gap: 10px; }
+  .path-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border: 1px solid var(--rule); border-radius: 8px; background: #fff;
+  }
+  .path-info { flex: 1; min-width: 0; }
+  .path-info strong { display: block; font-size: 15px; font-weight: 700; color: var(--ink); }
+  .path-info .desc { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .path-tally { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .path-count {
+    font-size: 26px; font-weight: 800; color: var(--green);
+    min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .plus-btn {
+    width: 54px; height: 54px; flex-shrink: 0; margin: 0; padding: 0;
+    font-size: 30px; font-weight: 700; line-height: 1; text-transform: none; letter-spacing: 0;
+    color: #fff; background: var(--red); border: none; border-radius: 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .plus-btn:active { background: var(--red-deep); transform: scale(0.95); }
+  .plus-btn.flash { background: var(--green); }
+
+  button {
+    width: 100%;
+    margin-top: 26px;
+    padding: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--red);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  button:active { background: var(--red-deep); }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .status {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    display: none;
+  }
+  .status.ok {
+    background: #E8EFEA;
+    border-left: 4px solid var(--green);
+    color: var(--green-deep);
+    display: block;
+  }
+  .status.err {
+    background: #FDEBEB;
+    border-left: 4px solid var(--red);
+    color: var(--red-deep);
+    display: block;
+  }
+
+  .count {
+    margin-top: 28px;
+    padding: 22px 18px;
+    background: var(--grey-bg);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .count strong {
+    display: block;
+    font-size: 44px;
+    color: var(--green);
+    margin-top: 6px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  optgroup { font-style: normal; font-weight: 700; color: var(--black); }
+  .footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+  }
+  .footer .tm-red   { color: var(--black); font-weight: 700; }
+  .footer .tm-black { color: var(--black); font-weight: 700; }
+  .footer .tm-green { color: var(--black); font-weight: 700; }
+
+  @media (max-width: 380px) {
+    header { padding: 24px 16px 18px; }
+    header img.logo { width: 110px; height: 110px; margin-bottom: 14px; }
+    header .wordmark { font-size: 30px; }
+    header .wm-votes sup { font-size: 14px; }
+    header .sub { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stripe">
+  <div class="s-red"></div>
+  <div class="s-black"></div>
+  <div class="s-green"></div>
+</div>
+
+<header>
+  <img class="logo" src="logo.png" alt="D9 Harlem Votes™ logo">
+  <div class="wordmark">
+    <span class="wm-d9">D9</span>
+    <span class="wm-harlem">Harlem</span>
+    <span class="wm-votes">Votes<sup>™</sup></span>
+  </div>
+  <div class="sub">Voter Engagement Tracker</div>
+</header>
+
+<div class="stripe thin">
+  <div class="s-red"></div>
+  <div class="s-black"></div>
+  <div class="s-green"></div>
+</div>
+
+<div class="wrap">
+
+  <div id="setup">
+
+  <label for="shiftDate">Shift Date <span class="req">*</span></label>
+  <select id="shiftDate" required>
+    <option value="">— Select your shift date —</option>
+    <option value="June 6" selected>June 6</option>
+    <option value="June 13" disabled>June 13 — not yet active</option>
+    <option value="June 19 — Juneteenth" disabled>June 19 — Juneteenth — not yet active</option>
+  </select>
+
+  <label for="site">Site <span class="req">*</span></label>
+  <select id="site" required>
+    <option value="">— Select your site —</option>
+    <optgroup label="June 6 &amp; June 13">
+      <option>E. 116th St. &amp; Lexington Ave.</option>
+      <option>W. 116th St. &amp; Frederick Douglass Blvd.</option>
+      <option>W. 116th St. &amp; Malcolm X Blvd.</option>
+      <option>W. 125th St. &amp; Adam Clayton Powell Jr. Blvd.</option>
+      <option>W. 125th St. &amp; Malcolm X Blvd.</option>
+      <option>W. 135th St. &amp; Malcolm X Blvd.</option>
+      <option>W. 145th St. &amp; Saint Nicholas Ave.</option>
+    </optgroup>
+    <optgroup label="June 19 — Juneteenth (not yet active)" disabled>
+      <option>W. 120th St. &amp; Malcolm X Blvd.</option>
+    </optgroup>
+  </select>
+
+  <label for="volunteer">Your Name <span class="req">*</span></label>
+  <input type="text" id="volunteer" placeholder="First and last name" autocomplete="name" required>
+
+  <label for="org">Organization <span class="req">*</span></label>
+  <select id="org" required>
+    <option value="">— Select your organization —</option>
+    <option>Alpha Phi Alpha Fraternity, Inc.</option>
+    <option>Alpha Kappa Alpha Sorority, Inc.</option>
+    <option>Kappa Alpha Psi Fraternity, Inc.</option>
+    <option>Omega Psi Phi Fraternity, Inc.</option>
+    <option>Delta Sigma Theta Sorority, Inc.</option>
+    <option>Phi Beta Sigma Fraternity, Inc.</option>
+    <option>Zeta Phi Beta Sorority, Inc.</option>
+    <option>Sigma Gamma Rho Sorority, Inc.</option>
+    <option>Iota Phi Theta Fraternity, Inc.</option>
+    <option>Other-Partner</option>
+  </select>
+  <input type="text" id="orgOther" placeholder="Type your organization" autocomplete="organization" style="display:none; margin-top:10px;">
+
+  <button id="startBtn">Start Logging</button>
+  <div id="setupStatus" class="status"></div>
+
+  </div>
+
+  <div id="logging" style="display:none;">
+
+  <div class="shift-banner" id="shiftBanner"></div>
+
+  <p class="tally-hint">Tap <strong>+</strong> for each voter as you go. Every tap logs one.</p>
+
+  <div class="tally">
+
+    <div class="path-group">Registered / Applied</div>
+
+    <div class="path-row">
+      <div class="path-info">
+        <strong>Path A — D9 Harlem Votes™ Drop-Off</strong>
+        <span class="desc">Voter completed the application with you. You guided them and saw it finished. D9 Harlem Votes™ collects it and delivers to the NYC Board of Elections.</span>
+      </div>
+      <div class="path-tally">
+        <span class="path-count" id="count-A">0</span>
+        <button class="plus-btn" data-path="A — D9 Harlem Votes™ Drop-Off" aria-label="Add one to Path A">+</button>
+      </div>
+    </div>
+
+    <div class="path-row">
+      <div class="path-info">
+        <strong>Path B — Self-Delivery to NYC Board of Elections</strong>
+        <span class="desc">Voter completed the application with you. You guided them and saw it finished. They mail or deliver it themselves.</span>
+      </div>
+      <div class="path-tally">
+        <span class="path-count" id="count-B">0</span>
+        <button class="plus-btn" data-path="B — Self-Delivery to NYC Board of Elections" aria-label="Add one to Path B">+</button>
+      </div>
+    </div>
+
+    <div class="path-row">
+      <div class="path-info">
+        <strong>Path C — Voting Plans</strong>
+        <span class="desc">Voter is already registered and plans to vote. You confirmed their registration, poll site, and what is on the ballot.</span>
+      </div>
+      <div class="path-tally">
+        <span class="path-count" id="count-C">0</span>
+        <button class="plus-btn" data-path="C — Voting Plans" aria-label="Add one to Path C">+</button>
+      </div>
+    </div>
+
+    <div class="path-group">Not Registered</div>
+
+    <div class="path-row">
+      <div class="path-info">
+        <strong>Path D — Plans to Apply</strong>
+        <span class="desc">Voter is eligible but did not complete an application. You gave them the steps and they plan to apply. Warm lead for follow-up.</span>
+      </div>
+      <div class="path-tally">
+        <span class="path-count" id="count-D">0</span>
+        <button class="plus-btn" data-path="D — Plans to Apply" aria-label="Add one to Path D">+</button>
+      </div>
+    </div>
+
+    <div class="path-row">
+      <div class="path-info">
+        <strong>Path E — Eligible, Undecided</strong>
+        <span class="desc">Voter is eligible and got the steps but did not commit or declined for now. Track for later follow-up.</span>
+      </div>
+      <div class="path-tally">
+        <span class="path-count" id="count-E">0</span>
+        <button class="plus-btn" data-path="E — Eligible, Undecided" aria-label="Add one to Path E">+</button>
+      </div>
+    </div>
+
+    <div class="path-row">
+      <div class="path-info">
+        <strong>Path F — Not Yet Eligible</strong>
+        <span class="desc">Voter is not yet eligible to register. You gave guidance on what they need to become eligible: citizenship, age, residency, or rights restoration.</span>
+      </div>
+      <div class="path-tally">
+        <span class="path-count" id="count-F">0</span>
+        <button class="plus-btn" data-path="F — Not Yet Eligible" aria-label="Add one to Path F">+</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <div class="count">
+    Total this shift
+    <strong id="counter">0</strong>
+  </div>
+
+  </div>
+
+  <div class="footer">
+    <span class="tm-red">D9</span> <span class="tm-black">Harlem</span> <span class="tm-green">Votes™</span> · Boots on the Ground
+  </div>
+
+</div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGK1ucGF1qBjOhLyLSs9XxA2HWH4fCidl5SbMTBxw2xKPShp3WbWXcurxWOCgoj8e0UA/exec';
+
+  let shift = null;
+  const counts = {};
+  let total = 0;
+
+  const setupEl = document.getElementById('setup');
+  const loggingEl = document.getElementById('logging');
+  const orgSel = document.getElementById('org');
+  const orgOther = document.getElementById('orgOther');
+  const startBtn = document.getElementById('startBtn');
+  const setupStatus = document.getElementById('setupStatus');
+  const statusEl = document.getElementById('status');
+
+  // Show the type-in field only when "Other-Partner" is chosen.
+  orgSel.addEventListener('change', function () {
+    const other = orgSel.value === 'Other-Partner';
+    orgOther.style.display = other ? 'block' : 'none';
+    if (!other) orgOther.value = '';
+  });
+
+  // ---- Stage 1: set up the shift once ----
+  startBtn.addEventListener('click', startShift);
+
+  function startShift() {
+    const shiftDate = document.getElementById('shiftDate').value;
+    const site = document.getElementById('site').value;
+    const volunteer = document.getElementById('volunteer').value.trim();
+    let org = orgSel.value;
+
+    if (!shiftDate) return setErr('Please select your shift date.');
+    if (!site) return setErr('Please select your site.');
+    if (!volunteer) return setErr('Please enter your name.');
+    if (!org) return setErr('Please select your organization.');
+    if (org === 'Other-Partner') {
+      const typed = orgOther.value.trim();
+      if (!typed) return setErr('Please type your organization.');
+      org = typed;
+    }
+
+    shift = { shiftDate: shiftDate, site: site, volunteer: volunteer, organization: org };
+
+    document.getElementById('shiftBanner').innerHTML =
+      '<div class="who">' + esc(volunteer) + ' · ' + esc(org) + '</div>' +
+      '<div class="meta">' + esc(site) + ' · ' + esc(shiftDate) + '</div>' +
+      '<span class="edit" id="editShift">Change setup</span>';
+    document.getElementById('editShift').addEventListener('click', editShift);
+
+    setupStatus.style.display = 'none';
+    setupEl.style.display = 'none';
+    loggingEl.style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+
+  function editShift() {
+    loggingEl.style.display = 'none';
+    setupEl.style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+
+  // ---- Stage 2: tap + to log one contact per voter ----
+  document.querySelectorAll('.plus-btn').forEach(function (b) {
+    b.addEventListener('click', function () { logContact(b.getAttribute('data-path'), b); });
+  });
+
+  function pathKey(value) { return value.charAt(0); }
+
+  function refreshCount(value) {
+    var el = document.getElementById('count-' + pathKey(value));
+    if (el) el.textContent = counts[value] || 0;
+    document.getElementById('counter').textContent = total;
+  }
+
+  function logContact(value, b) {
+    if (!shift) { showErr('Please set up your shift first.'); return; }
+
+    // Optimistic: bump the on-screen tally right away so taps feel instant.
+    counts[value] = (counts[value] || 0) + 1;
+    total++;
+    refreshCount(value);
+    flash(b);
+    statusEl.style.display = 'none';
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        type: 'engagement',
+        siteName: shift.site,
+        shiftDate: shift.shiftDate,
+        volunteerName: shift.volunteer,
+        organization: shift.organization,
+        path: value,
+        notes: ''
+      })
+    })
+    .catch(function () {
+      // Network failed: roll the tally back so the count stays honest.
+      counts[value] = Math.max(0, (counts[value] || 1) - 1);
+      total = Math.max(0, total - 1);
+      refreshCount(value);
+      showErr('A Path ' + pathKey(value) + ' tap did not send. Check signal and tap it again.');
+    });
+  }
+
+  function flash(b) {
+    b.classList.add('flash');
+    setTimeout(function () { b.classList.remove('flash'); }, 220);
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function setErr(msg) {
+    setupStatus.className = 'status err';
+    setupStatus.textContent = msg;
+  }
+  function showOk(msg) {
+    statusEl.className = 'status ok';
+    statusEl.textContent = msg;
+  }
+  function showErr(msg) {
+    statusEl.className = 'status err';
+    statusEl.textContent = msg;
+  }
+</script>
+
+</body>
+</html>
