@@ -362,6 +362,8 @@
   <label for="shiftDate">Shift Date <span class="req">*</span></label>
   <select id="shiftDate" required>
     <option value="">— Select your shift date —</option>
+    <option value="October 24 — Golden Saturday">October 24 — Golden Saturday</option>
+    <option value="September 19 — Constitution Day &amp; African American Day Parade">September 19 — Constitution Day &amp; African American Day Parade</option>
     <option value="August 16 — Harlem Week" selected>August 16 — Harlem Week</option>
     <option value="July 25 — Shiloh Health &amp; Wellness Fair">July 25 — Shiloh Health &amp; Wellness Fair</option>
     <option value="June 19 — Juneteenth">June 19 — Juneteenth</option>
@@ -370,6 +372,13 @@
   <label for="site">Site <span class="req">*</span></label>
   <select id="site" required>
     <option value="">— Select your site —</option>
+    <optgroup label="October 24 — Golden Saturday">
+      <option>All locations (10-1 PM)</option>
+    </optgroup>
+    <optgroup label="September 19 — Constitution Day &amp; African American Day Parade">
+      <option>Harlem State Office Building, African American Day Parade pre-event activation: 163 W. 125th St. NY, NY 10027 (12-5 PM).</option>
+      <option>150 E. 116th St., NY, NY 10029, corner of Lexington Avenue / Sam Famous Pizza (11-3 PM)</option>
+    </optgroup>
     <optgroup label="August 16 — Harlem Week">
       <option>W. 135th Street and Lenox Avenue Stage</option>
     </optgroup>
@@ -380,6 +389,10 @@
       <option>W. 120th St. &amp; Malcolm X Blvd.</option>
     </optgroup>
   </select>
+  <div id="partnerNote" class="shift-banner" style="display:none; margin-top:12px;">
+    <div class="who">Partner Work Being Tracked</div>
+    <div class="meta">The League of Women Voters and New York Alumnae Chapter, Delta Sigma Theta Sorority, Inc. will distribute copies of the Constitution along with voter registrations at this location. We track their work separately to ensure accurate reporting.</div>
+  </div>
 
   <label for="volunteer">Your Name <span class="req">*</span></label>
   <input type="text" id="volunteer" placeholder="First and last name" autocomplete="name" required>
@@ -636,6 +649,14 @@
     const other = chapterSel.value === 'Other';
     chapterOther.style.display = other ? 'block' : 'none';
     if (!other) chapterOther.value = '';
+  });
+
+  // Show partner note only when 116th Street location is selected.
+  document.getElementById('site').addEventListener('change', function () {
+    const site = this.value;
+    const partnerNote = document.getElementById('partnerNote');
+    const show116th = site.indexOf('150 E. 116th St.') !== -1;
+    partnerNote.style.display = show116th ? 'block' : 'none';
   });
 
   // ---- Stage 1: set up the shift once ----
